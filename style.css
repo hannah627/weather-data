@@ -1,0 +1,22 @@
+h1, select {
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+}
+
+h1 {
+    margin-bottom: 10px;
+}
+
+select {
+    width: 10em;
+    font-size: 2em; /* same size as h1 */
+    margin-bottom: 10px;
+}
+
+#main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
