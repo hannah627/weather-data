@@ -40,7 +40,7 @@ var chartG = svg.append('g')
     .attr('transform', 'translate('+[padding.l, padding.t]+')');
 
 var yScale = d3.scaleLinear()
-    .domain([-10, 120])
+    .domain([0, 110])
     .range([chartHeight, 0]);
 
 
@@ -49,8 +49,7 @@ var toolTip = d3.tip()
     .attr("class", "d3-tip")
     .offset([-5, 0])
     .html(function(d) {
-        // return "<h5>"+d['day']+"</h5>";
-        return "<h5>"+d['city']+" - "+d['temp']+"&deg</h5>"
+        return "<h2>"+d['city']+" - "+d['temp']+"&deg</h2>"
     });
 svg.call(toolTip); // instantiating the tooltip on the svg
 
@@ -60,14 +59,22 @@ var formatMonth = d3.timeFormat('%m') // to get the month (07, 08, etc.) out of 
 var formatDay = d3.timeFormat('%d') // to get the day out of date, for labeling on axis
 
 
-// to be updated with the data when it loads (allows it to be accessed by other functions)
-// var yearData = []
+// to be updated with the data for each city when it loads (allows it to be accessed by other functions)
+var seaYearData = [];
+var houYearData = [];
+var nycYearData = [];
+var phxYearData = [];
 
-var seaYearData = []
-var houYearData = []
+var cities = ["Seattle", "New York City", "Houston", "Phoenix"]
+var datasets = [seaYearData, nycYearData, houYearData, phxYearData]
 
-var cities = ["Seattle", "Houston"]
-var datasets = [seaYearData, houYearData]
+var legendEntries = d3.selectAll('input');
+console.log(legendEntries._groups);
+for (let i = 0; i < legendEntries.length; i++) {
+    console.log('in loop')
+    let curr_entry = legendEntries[i];
+    console.log(curr_entry);
+}
 
 
 // way to structure with multiple csvs?
@@ -80,7 +87,9 @@ var datasets = [seaYearData, houYearData]
 
 Promise.all([
     d3.csv("data/SEA.csv", dataPreprocessor),
+    d3.csv("data/NYC.csv", dataPreprocessor),
     d3.csv("data/HOU.csv", dataPreprocessor),
+    d3.csv("data/PHX.csv", dataPreprocessor),
 ]).then(function(files) {
     // files[0] will contain file1.csv
     // files[1] will contain file2.csv
@@ -131,22 +140,6 @@ function updateChart() {
             .domain([1, numDays])
             .range([0, chartWidth]);
 
-        var className = month_data[i].city + "_point";
-
-
-        // var line_group = chartG.append('g')
-        //     .data(month_data)
-        //     .enter();
-
-        // line_group.append('path')
-        //     .attr("d", d3.line()
-        //         .x(function(d) { return xScale(d.day) })
-        //         .y(function(d) { return yScale(d.temp) })
-        //     )
-        //     .attr('class', 'line')
-        //     .attr('fill', 'none')
-        //     .attr('stroke', function(d) { return color_palette[i]});
-
 
         chartG.append('path')
             .datum(month_data)
@@ -158,18 +151,18 @@ function updateChart() {
             .attr('fill', 'none')
             .attr('stroke', function(d) { return color_palette[i]});
 
+        // getting the name for the city, which is used to not overwrite other city's points
+        var className = month_data[i].city + "_point";
+
         // making the dots on each line
-        //var dotsGroup = chartG.selectAll('g').data(month_data).enter().append('g')
-
-        // var dotsGroup = chartG.selectAll(cities_group)
-        // console.log(dotsGroup)
-
         chartG.selectAll(className).data(month_data).enter().append('circle')
             .attr('class', 'dot')
             .style("fill", function(d) { return color_palette[i]})
             .attr('r', 2.5)
             .on('mouseover', toolTip.show)
             .on('mouseout', toolTip.hide)
+            // .on('click', toggleFocus) ??
+            // to grey out/ remove other lines and "focus" this one
             .attr('cx', function(d) { return xScale(d.day) })
             .attr('cy', function(d) { return yScale(d.temp) });
 

@@ -1,4 +1,4 @@
-README 
+README
 
 City Names:
 CLT -> Charlotte, North Carolina
@@ -7,4 +7,8 @@ IND -> Indianapolis, Indiana
 JAX -> Jacksonville, Florida
 MDW -> Chicago, Illinois
 PHL -> Philadelphia, Pennsylvania
-PHX -> Pheonix, Arizona
+PHX -> Phoenix, Arizona
+
+HOU -> Houston, Texas
+SEA -> Seattle, Washington
+NYC -> New York City, New York

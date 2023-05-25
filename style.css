@@ -1,10 +1,22 @@
 h1, select {
     text-align: center;
+}
+
+h1,
+h2,
+select,
+fieldset,
+.axis-label {
     font-family: 'Montserrat', sans-serif;
 }
 
 h1 {
     margin-bottom: 10px;
+}
+
+h2 {
+    background-color: white;
+    font-size: 1em;
 }
 
 select {
@@ -13,10 +25,20 @@ select {
     margin-bottom: 10px;
 }
 
-#main {
+fieldset, .positioning {
+    width: 14em;
+}
+
+.column {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
+.row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+}

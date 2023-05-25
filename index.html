@@ -10,23 +10,48 @@
 </head>
 <body>
     <div id="main">
-        <h1>Mean Daily Temperatures in</h1>
-        <select class="custom-select" id="monthSelect" onchange="onMonthChanged()">
-            <option selected value="01">January</option>
-            <option value="02">February</option>
-            <option value="03">March</option>
-            <option value="04">April</option>
-            <option value="05">May</option>
-            <option value="06">June</option>
-            <option value="07">July</option>
-            <option value="08">August</option>
-            <option value="09">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-        </select>
-        <svg width="1000" height="600"></svg>
-        <!-- style="border: 1px solid #777;" -->
+        <div class="row">
+            <div class="positioning"></div>
+            <div class="column">
+                <h1>Mean Daily Temperatures in</h1>
+                <select class="custom-select" id="monthSelect" onchange="onMonthChanged()">
+                    <option selected value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+            <fieldset>
+                <legend>Cities:</legend>
+                <div>
+                    <input type="checkbox" id="Seattle" name="Seattle" checked>
+                    <label for="Seattle">Seattle, Washington</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="NYC" name="NYC" checked>
+                    <label for="NYC">New York City, New York</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="Houston" name="Houston" checked>
+                    <label for="Houston">Houston, Texas</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="Phoenix" name="Phoenix, Arizona" checked>
+                    <label for="Phoenix">Phoenix, Arizona</label>
+                </div>
+            </fieldset>
+        </div>
+        <div class="column">
+            <svg width="1000" height="600"></svg>
+        </div>
     </div>
 </body>
 <script src="//d3js.org/d3.v5.min.js"></script>
