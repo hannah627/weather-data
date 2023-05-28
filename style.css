@@ -1,9 +1,10 @@
-h1, select {
+h1, select, .tool-tip {
     text-align: center;
 }
 
 h1,
 h2,
+h3,
 select,
 fieldset,
 .axis-label {
@@ -15,14 +16,25 @@ h1 {
 }
 
 h2 {
-    background-color: white;
-    font-size: 1em;
+    font-size: 1.1em;
+}
+
+h3 {
+    font-size: 0.9em;
 }
 
 select {
-    width: 10em;
     font-size: 2em; /* same size as h1 */
+}
+
+#monthSelect {
+    width: 10em;
     margin-bottom: 10px;
+}
+
+#varSelect {
+    width: 4em;
+    margin-right: 5px;
 }
 
 fieldset, .positioning {
@@ -41,4 +53,26 @@ fieldset, .positioning {
     flex-direction: row;
     justify-content: space-between;
     align-items: baseline;
+}
+
+.d3-tip {
+    background-color: white;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+}
+
+.legendEntry > p {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.legendBox {
+    width: 1em;
+    height: 1em;
+}
+
+.unfocused {
+    opacity: 25%;
 }

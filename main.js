@@ -1,13 +1,24 @@
-console.log('working 6')
+console.log('working 3')
 
-var monthSelect = d3.select('#monthSelect').node(); // Get current value of select element
+
+var varSelect = d3.select('#varSelect').node(); // Get current value of variable select element
+var variable = varSelect.options[varSelect.selectedIndex].value;
+
+function onVarChanged() {
+    variable = varSelect.options[varSelect.selectedIndex].value;
+    updateChart();
+}
+
+
+var monthSelect = d3.select('#monthSelect').node(); // Get current value of month select element
 var month = monthSelect.options[monthSelect.selectedIndex].value;
+var monthName = monthSelect.options[monthSelect.selectedIndex].label;
 
-// Global function called when select element is changed
 function onMonthChanged() {
     month = monthSelect.options[monthSelect.selectedIndex].value;
     updateChart();
 }
+
 
 // the IBM color-blind-accessible palette, found on https://davidmathlogic.com/colorblind/
 var color_palette = ["#648fff","#634AD5","#dc267f","#fe6100","#ffb000"];
@@ -16,9 +27,10 @@ var color_palette = ["#648fff","#634AD5","#dc267f","#fe6100","#ffb000"];
 // function to help ensure loaded data has the correct type
 function dataPreprocessor(row) {
     return {
-        //date: row.date.substring(5), // returns date in format "7-1" (removes year - original format "2014-7-1")
-        date: row.date,
-        temp: +row.actual_mean_temp
+        date: row.date, // returns in format "2014-7-1"
+        mean_temp: +row.actual_mean_temp, // mean temperature for that day
+        max_temp: +row.actual_max_temp,
+        min_temp: +row.actual_min_temp
     };
 }
 
@@ -43,13 +55,31 @@ var yScale = d3.scaleLinear()
     .domain([0, 110])
     .range([chartHeight, 0]);
 
+// x-axis label
+chartG.append('text')
+    .text('Days of the Month')
+    .attr('class', 'axis-label')
+    .attr('transform', 'translate(400, 565)');
+
+// y-axis
+chartG.append('g')
+    .attr('class', 'y-axis')
+    .attr('transform', 'translate(0, -10)')
+    .call(d3.axisLeft(yScale));
+
+// y-axis label
+chartG.append('text')
+    .text('Mean Daily Temperature (Degrees Fahrenheit)')
+    .attr('class', 'axis-label')
+    .attr('transform', 'translate(-30, 400) rotate(270)');
+
 
 // creating tooltip using external library
 var toolTip = d3.tip()
     .attr("class", "d3-tip")
     .offset([-5, 0])
     .html(function(d) {
-        return "<h2>"+d['city']+" - "+d['temp']+"&deg</h2>"
+        return "<div class='tooltip'><h2>"+d['mean_temp']+"&deg</h2><h3>"+d['city']+" - "+monthName+" "+d.day+"</h3></div>"
     });
 svg.call(toolTip); // instantiating the tooltip on the svg
 
@@ -64,25 +94,10 @@ var seaYearData = [];
 var houYearData = [];
 var nycYearData = [];
 var phxYearData = [];
+var jaxYearData = [];
 
-var cities = ["Seattle", "New York City", "Houston", "Phoenix"]
-var datasets = [seaYearData, nycYearData, houYearData, phxYearData]
-
-var legendEntries = d3.selectAll('input');
-console.log(legendEntries._groups);
-for (let i = 0; i < legendEntries.length; i++) {
-    console.log('in loop')
-    let curr_entry = legendEntries[i];
-    console.log(curr_entry);
-}
-
-
-// way to structure with multiple csvs?
-// read each csv
-// make variable with that city's nested data (name like NYC_yearData)
-// make update function go through list of city's, and for each, call another function
-// that function has the stuff currently in the update function (like filtering data, drawing line)
-// but keep axis stuff in updatechart, not new function, cause don't need to do it 11 times
+var cities = ["Seattle", "New York City", "Houston", "Phoenix", "Jacksonville"];
+var datasets = [seaYearData, nycYearData, houYearData, phxYearData, jaxYearData];
 
 
 Promise.all([
@@ -90,9 +105,8 @@ Promise.all([
     d3.csv("data/NYC.csv", dataPreprocessor),
     d3.csv("data/HOU.csv", dataPreprocessor),
     d3.csv("data/PHX.csv", dataPreprocessor),
+    d3.csv("data/JAX.csv", dataPreprocessor)
 ]).then(function(files) {
-    // files[0] will contain file1.csv
-    // files[1] will contain file2.csv
     for (let i = 0; i < files.length; i++) {
 
         var dataset = files[i];
@@ -116,20 +130,71 @@ Promise.all([
 })
 
 
+d3.selectAll('.legendBox').on('click', toggleFocus) // to grey out/ remove other lines and "focus" this one
+var focusedCity = ""; // variable to track which line is currently "focused" (if none, = "")
+
+function toggleFocus() {
+    /*
+    allows users to click on a line or a box in the legend and "focus" one city by lowering the opacity
+    of the lines and boxes representing the other cities. Users can click the same line or box again to "unfocus"
+    that line/city, resetting the opacity of the others to 100%
+    */
+
+    let clickedCity = this.parentNode.id; // city (i.e. "Seattle")
+    let lineGroups = d3.selectAll('.lineGroup')._groups[0]; // the groups containing the lines and points for each city
+    let legendBoxes = d3.selectAll('.legendBox')._groups[0]; // the divs that make the colored boxes in the legend
+
+    for (let i = 0; i < lineGroups.length; i++) {
+        let currCity = lineGroups[i].id;
+        // if no line is currently focused, 'unfocus' all lines except the one that was clicked
+        if ((focusedCity == "") && (clickedCity != currCity)) {
+            lineGroups[i].classList.add('unfocused');
+            legendBoxes[i].classList.add('unfocused');
+        }
+        // if the clicked line is currently focused, 're-focus' all other lines
+        else if (focusedCity == clickedCity) {
+            lineGroups[i].classList.remove('unfocused');
+            legendBoxes[i].classList.remove('unfocused');
+        } // else (a different city is already focused - do nothing)
+    }
+
+    // if there was no focused city, make the clicked city the focused city
+    if (focusedCity == "") {
+        focusedCity = clickedCity;
+    }
+    // else if the user clicked on the already-focused city, go back to no city being focused
+    else if (focusedCity == clickedCity) {
+        focusedCity = "";
+    }
+
+}
+
+
+var tempFormat = 'fahrenheit';
+function toggleTemp() {
+    console.log('temp toggled')
+    if (tempFormat === 'fahrenheit') {
+        console.log('fahrenheit');
+    } else {
+        console.log('celsius now');
+    }
+}
+
+
 function updateChart() {
     // don't need to pass anything because "month" & "datasets" are global variables and we filter here
 
     // removing things that need to be replaced - maybe update to use "enter update exit" later?
     chartG.selectAll('.x-axis').remove();
+    chartG.selectAll('.lineGroup').remove();
     chartG.selectAll('.line').remove()
     chartG.selectAll('.dot').remove();
 
-    //var cities_group = chartG.selectAll('.city').data(cities).enter().append('g');
+    chartG.selectAll('.legendBox').classList.remove('unfocused');
 
     // filtering data and making line for each city
     for (let i = 0; i < datasets.length; i++) {
         var yearData = datasets[i];
-        var numDays = 0;
 
         // to get data for current month, need index of object in nested with key month
         var index = yearData.map(function(m) { return m.key; }).indexOf(month);
@@ -140,57 +205,43 @@ function updateChart() {
             .domain([1, numDays])
             .range([0, chartWidth]);
 
+        // making groups to hold lines and points
+        var lineGroup = chartG.append('g')
+            .data(month_data)
+            .attr('class', 'lineGroup')
+            .attr('id', function(d) { return d.city });
 
-        chartG.append('path')
+        // making the lines
+        lineGroup.append('path')
             .datum(month_data)
             .attr("d", d3.line()
                 .x(function(d) { return xScale(d.day) })
-                .y(function(d) { return yScale(d.temp) })
+                .y(function(d) { return yScale(d.mean_temp) })
             )
             .attr('class', 'line')
             .attr('fill', 'none')
-            .attr('stroke', function(d) { return color_palette[i]});
+            .attr('stroke', function() { return color_palette[i] });
 
         // getting the name for the city, which is used to not overwrite other city's points
         var className = month_data[i].city + "_point";
 
         // making the dots on each line
-        chartG.selectAll(className).data(month_data).enter().append('circle')
+        lineGroup.selectAll(className).data(month_data).enter().append('circle')
             .attr('class', 'dot')
-            .style("fill", function(d) { return color_palette[i]})
+            .style("fill", function() { return color_palette[i]})
             .attr('r', 2.5)
             .on('mouseover', toolTip.show)
             .on('mouseout', toolTip.hide)
-            // .on('click', toggleFocus) ??
-            // to grey out/ remove other lines and "focus" this one
+            .on('click', toggleFocus) // to grey out/ remove other lines and "focus" this one
             .attr('cx', function(d) { return xScale(d.day) })
-            .attr('cy', function(d) { return yScale(d.temp) });
+            .attr('cy', function(d) { return yScale(d.mean_temp) });
 
     }
 
-
-
     // x-axis
     chartG.append('g')
-        .attr('class', 'x-axis')
-        .attr('transform', 'translate(0, 530)')
-        .call(d3.axisBottom(xScale).ticks(numDays));
-
-    chartG.append('text')
-        .text('Days of the Month')
-        .attr('class', 'axis-label')
-        .attr('transform', 'translate(400, 565)');
-
-    // y-axis
-    chartG.append('g')
-        .attr('class', 'y-axis')
-        .attr('transform', 'translate(0, -10)')
-        .call(d3.axisLeft(yScale));
-
-    // y-axis label
-    chartG.append('text')
-        .text('Mean Daily Temperature (Degrees Fahrenheit)')
-        .attr('class', 'axis-label')
-        .attr('transform', 'translate(-30, 400) rotate(270)');
+    .attr('class', 'x-axis')
+    .attr('transform', 'translate(0, 530)')
+    .call(d3.axisBottom(xScale).ticks(numDays));
 
 }

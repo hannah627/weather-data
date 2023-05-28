@@ -13,8 +13,15 @@
         <div class="row">
             <div class="positioning"></div>
             <div class="column">
-                <h1>Mean Daily Temperatures in</h1>
-                <select class="custom-select" id="monthSelect" onchange="onMonthChanged()">
+                <div class="row">
+                    <select id="varSelect" onchange="onVarChanged()">
+                        <option selected value="mean_temp">Mean</option>
+                        <option value="max_temp">Max</option>
+                        <option value="min_temp">Min</option>
+                    </select>
+                    <h1>Daily Temperatures in</h1>
+                </div>
+                <select id="monthSelect" onchange="onMonthChanged()">
                     <option selected value="01">January</option>
                     <option value="02">February</option>
                     <option value="03">March</option>
@@ -31,21 +38,25 @@
             </div>
             <fieldset>
                 <legend>Cities:</legend>
-                <div>
-                    <input type="checkbox" id="Seattle" name="Seattle" checked>
-                    <label for="Seattle">Seattle, Washington</label>
+                <div id="Seattle" class="legendEntry row">
+                    <div class="legendBox" style="background-color: #648fff;"></div>
+                    <p>Seattle, Washington</p>
                 </div>
-                <div>
-                    <input type="checkbox" id="NYC" name="NYC" checked>
-                    <label for="NYC">New York City, New York</label>
+                <div id="New York City" class="legendEntry row">
+                    <div class="legendBox" style="background-color: #634AD5;"></div>
+                    <p>New York City, New York</p>
                 </div>
-                <div>
-                    <input type="checkbox" id="Houston" name="Houston" checked>
-                    <label for="Houston">Houston, Texas</label>
+                <div id="Houston" class="legendEntry row">
+                    <div class="legendBox" style="background-color: #dc267f;"></div>
+                    <p>Houston, Texas</p>
                 </div>
-                <div>
-                    <input type="checkbox" id="Phoenix" name="Phoenix, Arizona" checked>
-                    <label for="Phoenix">Phoenix, Arizona</label>
+                <div id="Phoenix" class="legendEntry row">
+                    <div class="legendBox" style="background-color: #fe6100;"></div>
+                    <p>Phoenix, Arizona</p>
+                </div>
+                <div id="Jacksonville" class="legendEntry row">
+                    <div class="legendBox" style="background-color: #ffb000;"></div>
+                    <p>Jacksonville, Florida</p>
                 </div>
             </fieldset>
         </div>
