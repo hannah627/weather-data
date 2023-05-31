@@ -1,14 +1,15 @@
-h1, select, .tool-tip {
-    text-align: center;
-}
-
 h1,
 h2,
 h3,
+p,
 select,
 fieldset,
 .axis-label {
     font-family: 'Montserrat', sans-serif;
+}
+
+h1, select, .tool-tip {
+    text-align: center;
 }
 
 h1 {
@@ -23,8 +24,21 @@ h3 {
     font-size: 0.9em;
 }
 
+body {
+    display: flex;
+    justify-content: center;
+}
+
 select {
     font-size: 2em; /* same size as h1 */
+}
+
+fieldset, .positioning {
+    width: 14em;
+}
+
+#main {
+    width: 1026px;
 }
 
 #monthSelect {
@@ -33,12 +47,8 @@ select {
 }
 
 #varSelect {
-    width: 4em;
-    margin-right: 5px;
-}
-
-fieldset, .positioning {
-    width: 14em;
+    width: 3.5em;
+    margin-right: 15px;
 }
 
 .column {

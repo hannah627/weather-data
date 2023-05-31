@@ -1,6 +1,3 @@
-console.log('working 3')
-
-
 var varSelect = d3.select('#varSelect').node(); // Get current value of variable select element
 var variable = varSelect.options[varSelect.selectedIndex].value;
 
@@ -16,12 +13,9 @@ var monthName = monthSelect.options[monthSelect.selectedIndex].label;
 
 function onMonthChanged() {
     month = monthSelect.options[monthSelect.selectedIndex].value;
+    monthName = monthSelect.options[monthSelect.selectedIndex].label;
     updateChart();
 }
-
-
-// the IBM color-blind-accessible palette, found on https://davidmathlogic.com/colorblind/
-var color_palette = ["#648fff","#634AD5","#dc267f","#fe6100","#ffb000"];
 
 
 // function to help ensure loaded data has the correct type
@@ -32,6 +26,12 @@ function dataPreprocessor(row) {
         max_temp: +row.actual_max_temp,
         min_temp: +row.actual_min_temp
     };
+}
+
+function convertCelsius(f) {
+    // takes fahrenheit temperature and converts it to celsius
+    let c = (5/9) * (f-32);
+    return c
 }
 
 
@@ -79,7 +79,7 @@ var toolTip = d3.tip()
     .attr("class", "d3-tip")
     .offset([-5, 0])
     .html(function(d) {
-        return "<div class='tooltip'><h2>"+d['mean_temp']+"&deg</h2><h3>"+d['city']+" - "+monthName+" "+d.day+"</h3></div>"
+        return "<div class='tooltip'><h2>"+d[variable]+"&deg</h2><h3>"+d.city+" - "+monthName+" "+d.day+"</h3></div>"
     });
 svg.call(toolTip); // instantiating the tooltip on the svg
 
@@ -98,6 +98,9 @@ var jaxYearData = [];
 
 var cities = ["Seattle", "New York City", "Houston", "Phoenix", "Jacksonville"];
 var datasets = [seaYearData, nycYearData, houYearData, phxYearData, jaxYearData];
+
+// the IBM color-blind-accessible palette, found on https://davidmathlogic.com/colorblind/
+var color_palette = ["#648fff","#634AD5","#dc267f","#fe6100","#ffb000"];
 
 
 Promise.all([
@@ -118,6 +121,10 @@ Promise.all([
             d.month = formatMonth(d.date);
             d.day = +formatDay(d.date);
             d.city = curr_city;
+            // for potentially converting to celsius and back later
+            d.c_mean_temp = convertCelsius(d.mean_temp);
+            d.c_max_temp = convertCelsius(d.max_temp);
+            d.c_min_temp = convertCelsius(d.min_temp);
         }
 
         // nests data, i.e. groups it by month (because we get data for whole year)
@@ -142,19 +149,19 @@ function toggleFocus() {
 
     let clickedCity = this.parentNode.id; // city (i.e. "Seattle")
     let lineGroups = d3.selectAll('.lineGroup')._groups[0]; // the groups containing the lines and points for each city
-    let legendBoxes = d3.selectAll('.legendBox')._groups[0]; // the divs that make the colored boxes in the legend
+    let legendEntries = d3.selectAll('.legendEntry')._groups[0]; // the divs that make the colored boxes in the legend
 
     for (let i = 0; i < lineGroups.length; i++) {
         let currCity = lineGroups[i].id;
         // if no line is currently focused, 'unfocus' all lines except the one that was clicked
         if ((focusedCity == "") && (clickedCity != currCity)) {
             lineGroups[i].classList.add('unfocused');
-            legendBoxes[i].classList.add('unfocused');
+            legendEntries[i].classList.add('unfocused');
         }
         // if the clicked line is currently focused, 're-focus' all other lines
         else if (focusedCity == clickedCity) {
             lineGroups[i].classList.remove('unfocused');
-            legendBoxes[i].classList.remove('unfocused');
+            legendEntries[i].classList.remove('unfocused');
         } // else (a different city is already focused - do nothing)
     }
 
@@ -190,7 +197,15 @@ function updateChart() {
     chartG.selectAll('.line').remove()
     chartG.selectAll('.dot').remove();
 
-    chartG.selectAll('.legendBox').classList.remove('unfocused');
+
+    // ensuring that if user has "focused" a line and then updates the chart with a new variable or month,
+    // that the legend resets along with the lines
+    focusedCity = "";
+    let legendEntries = d3.selectAll('.legendEntry')._groups[0];
+    for (let i = 0; i < legendEntries.length; i++) {
+        legendEntries[i].classList.remove('unfocused');
+    };
+
 
     // filtering data and making line for each city
     for (let i = 0; i < datasets.length; i++) {
@@ -216,7 +231,7 @@ function updateChart() {
             .datum(month_data)
             .attr("d", d3.line()
                 .x(function(d) { return xScale(d.day) })
-                .y(function(d) { return yScale(d.mean_temp) })
+                .y(function(d) { return yScale(d[variable]) })
             )
             .attr('class', 'line')
             .attr('fill', 'none')
@@ -234,7 +249,7 @@ function updateChart() {
             .on('mouseout', toolTip.hide)
             .on('click', toggleFocus) // to grey out/ remove other lines and "focus" this one
             .attr('cx', function(d) { return xScale(d.day) })
-            .attr('cy', function(d) { return yScale(d.mean_temp) });
+            .attr('cy', function(d) { return yScale(d[variable]) });
 
     }
 
